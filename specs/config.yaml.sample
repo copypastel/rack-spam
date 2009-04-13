@@ -1,0 +1,6 @@
+# Rack::Spam configuration for your spam service of choice
+--- 
+:akismet: # akismet API key
+:defensio: # defensio API key
+:mollom: # mollom API key
+:domain: # domain, i.e. http://copypastel.com
