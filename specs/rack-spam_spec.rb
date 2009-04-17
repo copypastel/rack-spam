@@ -48,16 +48,19 @@ describe Rack::Spam do
       @filter.comment?(@env).should be(false)
     end
 
-    it "should check for :username, :email, and :comment values in the input stream" do
-      env_copy = @env
-      env_copy['rack.input'].gsub! 'username', 'user'
-      @filter.comment?(env_copy).should be(false)
-      env_copy = @env
-      env_copy['rack.input'].gsub! 'email', 'mail'
-      @filter.comment?(env_copy).should be(false)
-      env_copy = @env
-      env_copy['rack.input'].gsub! 'comment', 'thought'
-      @filter.comment?(env_copy).should be(false)
+    it "should check for :username value in the input stream" do
+      @env['rack.input'].gsub! 'username', 'user'
+      @filter.comment?(@env).should be(false)
+    end
+    
+    it "should check for :email value in the input stream" do
+      @env['rack.input'].gsub! 'email', 'mail'
+      @filter.comment?(@env).should be(false)
+    end
+
+    it "should check for :comment value in the input stream" do
+      @env['rack.input'].gsub! 'comment', 'thoughts'
+      @filter.comment?(@env).should be(false)
     end
 
   end
