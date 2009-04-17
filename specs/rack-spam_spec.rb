@@ -1,17 +1,18 @@
+require 'rack'
+require 'rack/lint'
+
 require File.expand_path(File.dirname(__FILE__) + '/../lib/rack-spam.rb')
 require File.expand_path(File.dirname(__FILE__) + '/../gem/akismet/lib/akismet')
 require File.expand_path(File.dirname(__FILE__) + '/../gem/rdefensio/lib/rdefensio')
 require File.expand_path(File.dirname(__FILE__) + '/../gem/ruby-mollom/lib/mollom')
 
-
 describe Rack::Spam do
 
   before :all do
-    config = File.open('config.yaml') {|f| YAML::load(f) }
+    config = YAML::load_file('config.yaml')
     @domain = config[:domain]
     @post_url = config[:post_url]
     @akismet_key, @defensio_key, @mollom_key = [:akismet, :defensio, :mollom].map {|s| config[s]}
-    @env
   end
 
   describe "#comment?" do
@@ -21,7 +22,7 @@ describe Rack::Spam do
     end
 
     before :each do
-      @env = {}
+      @env = YAML::load_file('env.yaml')
     end
 
     it "should accept @env as a valid comment" do
@@ -29,12 +30,12 @@ describe Rack::Spam do
     end
 
     it "should check that the request is a POST" do
-      @env[:REQUEST_METHOD] = 'GET'
+      @env['REQUEST_METHOD'] = 'GET'
       @filter.comment?(@env).should be(false)
     end
 
     it "should check against the comments POST URL" do
-      @env[:PATH_INFO] = ''
+      @env['PATH_INFO'] = ''
       @filter.comment?(@env).should be(false)
     end
 
