@@ -6,6 +6,15 @@ require File.expand_path(File.dirname(__FILE__) + '/../gem/akismet/lib/akismet')
 require File.expand_path(File.dirname(__FILE__) + '/../gem/rdefensio/lib/rdefensio')
 require File.expand_path(File.dirname(__FILE__) + '/../gem/ruby-mollom/lib/mollom')
 
+# rack.input's StringIO is replaced with a plain string in env.yaml. 
+# To maintain compatibility, String needs to respond to #read.
+
+class String
+  def read
+    self
+  end
+end
+
 describe Rack::Spam do
 
   before :all do
@@ -39,7 +48,12 @@ describe Rack::Spam do
       @filter.comment?(@env).should be(false)
     end
 
-    it "should check for :username, :email, and :comment values in the input stream"
+    it "should check for :username, :email, and :comment values in the input stream" do
+      post_data = @env['rack.input'].read
+      [/&?username=/, /&?email=/, /&?comment=/].each do |regexp|
+        (post_data =~ regexp).should_not be(nil)
+      end
+    end
 
   end
 
