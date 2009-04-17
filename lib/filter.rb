@@ -1,14 +1,25 @@
+require File.expand_path(File.dirname(__FILE__) + '/../gem/akismet/lib/akismet')
+require File.expand_path(File.dirname(__FILE__) + '/../gem/rdefensio/lib/rdefensio')
+require File.expand_path(File.dirname(__FILE__) + '/../gem/ruby-mollom/lib/mollom')
+
 module Rack
   module Spam
     class Filter
       
-      attr_accessor :service, :domain, :key, :post_url
+      attr_reader :domain, :key, :post_url
+      
+      class Service < Struct.new(:name, :instance); end;
       
       @@services = [:akismet, :defensio, :mollom]
       
       def initialize(service, domain, key, post_url)
         raise InvalidArgument unless @@services.include? service
-        @service, @domain, @key, @post_url = service, domain, key, post_url
+        @domain, @key, @post_url = domain, key, post_url
+        case service
+          when :akismet: @service = Service.new(service, Akismet.new(key, domain))
+          when :defensio:
+          when :mollom:
+        end
       end
       
       def spam?( env )
@@ -23,6 +34,14 @@ module Rack
           return false unless input =~ attribute
         end
         true
+      end
+      
+      def verify?
+        @service.instance.verify?
+      end
+      
+      def service
+        @service.name
       end
       
     end

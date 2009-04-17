@@ -3,9 +3,6 @@ require 'rack/lint'
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/spam.rb')
 require File.expand_path(File.dirname(__FILE__) + '/../lib/filter.rb')
-require File.expand_path(File.dirname(__FILE__) + '/../gem/akismet/lib/akismet')
-require File.expand_path(File.dirname(__FILE__) + '/../gem/rdefensio/lib/rdefensio')
-require File.expand_path(File.dirname(__FILE__) + '/../gem/ruby-mollom/lib/mollom')
 
 # rack.input's StringIO is replaced with a plain string in env.yaml. 
 # To maintain compatibility, String needs to respond to #read.
@@ -45,7 +42,7 @@ describe Rack::Spam do
         Rack::Spam::Filter.new(:mollom, @domain, @mollom_key, @post_url).class.should be(Rack::Spam::Filter)
       end
 
-      it "should check that :service is a valid service" do
+      it "should check that :service is one of the valid services" do
         lambda{ Rack::Spam::Filter.new(:tweetspam, @domain, '12345', @post_url) }.should raise_error
       end
 
@@ -97,6 +94,16 @@ describe Rack::Spam do
       before :all do
         @filter = Rack::Spam::Filter.new(:akismet, @domain, @akismet_key, @post_url)
         @spam = YAML::load_file('spam.yaml')
+      end
+
+      describe "#verify?" do
+
+        it "should validate the API key and domain" do
+          @filter.verify?.should be(true)
+          @filter = Rack::Spam::Filter.new(:akismet, @domain, '12345', @post_url)
+          lambda { @filter.verify? }.should raise_error
+        end
+
       end
 
       describe '#spam?' do
