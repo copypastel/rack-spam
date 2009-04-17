@@ -27,7 +27,10 @@ describe Rack::Spam do
   describe "#new" do
     
     it "should check that :service is an actual service" do
-      lambda{ Rack::Spam.new(:tweetspam, @domain, '12345', @post_url) }.should raise_error
+      Rack::Spam.new(:akismet, @domain, @akismet_key, @post_url).class.should   be(Rack::Spam)
+      Rack::Spam.new(:defensio, @domain, @defensio_key, @post_url).class.should be(Rack::Spam)
+      Rack::Spam.new(:mollom, @domain, @mollom_key, @post_url).class.should     be(Rack::Spam)
+      lambda{ Rack::Spam.new(:tweetspam, @domain, '12345', @post_url) }.should  raise_error
     end
     
   end
