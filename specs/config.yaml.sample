@@ -4,3 +4,4 @@
 :defensio: # defensio API key
 :mollom: # mollom API key
 :domain: # domain, i.e. http://copypastel.com
+:post_url: # post url, i.e. /comments
