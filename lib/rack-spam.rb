@@ -12,9 +12,12 @@ module Rack
   
   class Spam
     
+    @@services = [:akismet, :defensio, :mollom]
+    
     attr_accessor :service, :domain, :key
     
     def initialize( service, domain, key, post_url )
+      raise ArgumentError unless @@services.include? service
       @service, @domain, @key, @post_url = service, domain, key, post_url
     end
     

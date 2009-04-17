@@ -24,6 +24,14 @@ describe Rack::Spam do
     @akismet_key, @defensio_key, @mollom_key = [:akismet, :defensio, :mollom].map {|s| config[s]}
   end
 
+  describe "#new" do
+    
+    it "should check that :service is an actual service" do
+      lambda{ Rack::Spam.new(:tweetspam, @domain, '12345', @post_url) }.should raise_error
+    end
+    
+  end
+
   describe "#comment?" do
 
     before :all do
@@ -86,6 +94,7 @@ describe Rack::Spam do
 
     before :all do
       @filter = Rack::Spam.new(:defensio, @domain, @defensio_key, @post_url)
+      @spam = YAML::load_file('spam.yaml')
     end
 
     describe '#spam?' do
