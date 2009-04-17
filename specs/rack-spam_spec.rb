@@ -49,10 +49,15 @@ describe Rack::Spam do
     end
 
     it "should check for :username, :email, and :comment values in the input stream" do
-      post_data = @env['rack.input'].read
-      [/&?username=/, /&?email=/, /&?comment=/].each do |regexp|
-        (post_data =~ regexp).should_not be(nil)
-      end
+      env_copy = @env
+      env_copy['rack.input'].gsub! 'username', 'user'
+      @filter.comment?(env_copy).should be(false)
+      env_copy = @env
+      env_copy['rack.input'].gsub! 'email', 'mail'
+      @filter.comment?(env_copy).should be(false)
+      env_copy = @env
+      env_copy['rack.input'].gsub! 'comment', 'thought'
+      @filter.comment?(env_copy).should be(false)
     end
 
   end
