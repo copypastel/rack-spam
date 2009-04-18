@@ -1,13 +1,3 @@
-class Comment
-  
-  attr_accessor :username, :email, :comment
-  
-  def spam?
-    @spam
-  end
-
-end
-
 module Rack
   module Spam
     
