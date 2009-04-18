@@ -29,10 +29,10 @@ module Rack::Spam::Filter
       r = Rack::Request.new env
       params = { :user_ip => r.ip || '', 
                   :user_agent => env['HTTP_USER_AGENT'] || '', 
-                  :referrer => r.referrer, 
-                  :comment_author => r['username'], 
-                  :comment_author_email => r['email'], 
-                  :comment_content => r['comment'] }
+                  :referrer => r.referrer || '', 
+                  :comment_author => r['username'] || '', 
+                  :comment_author_email => r['email'] || '', 
+                  :comment_content => r['comment'] || ''}
       super(params)
     end
 
