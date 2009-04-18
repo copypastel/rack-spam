@@ -1,5 +1,12 @@
 require File.expand_path(File.dirname(__FILE__) + '/../lib/filter.rb')
-require File.expand_path(File.dirname(__FILE__) + '/../lib/filter/akismet.rb')
+
+# Akismet gives Filter a class to instantiate with #build during tests
+
+module Rack::Spam::Filter
+  class Akismet 
+    def initialize(domain, key, post_url); end
+  end 
+end
 
 include Rack::Spam
 
@@ -22,30 +29,6 @@ describe Rack::Spam::Filter do
     it 'should raise an error on trying to instantiate a Filter class that doesn\'t exist' do
       lambda { Filter.build(:tweetspam, @domain, @key, @post_url) }.should raise_error
     end
-  end
-
-  describe 'when serving as an interface for Filter classes' do
-
-    before :all do
-      @filter = Object.new.extend Filter
-    end
-
-    it 'should raise an error on checking if a request is spam.' do
-      lambda { @filter.spam? }.should raise_error
-    end
-
-    it 'should raise an error on checking if a request is a comment.' do
-      lambda { @filter.comment? }.should raise_error
-    end
-
-    it 'should raise an error on verifying API keys.' do
-      lambda { @filter.verify? }.should raise_error
-    end
-
-    it 'should raise an error on providing the spam service name' do
-      lambda { @filter.service }.should raise_error
-    end
-
   end
 
 end
