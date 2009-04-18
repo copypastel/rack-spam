@@ -10,13 +10,7 @@ module Rack
       def self.build(service, domain, key, post_url)
         self.const_get(service.to_s.capitalize).new(domain, key, post_url)
       end
-      
-      # Interface to be implemented by filters
-      def spam?( env );     raise NotImplementedError; end
-      def comment?( env );  raise NotImplementedError; end
-      def verify?;          raise NotImplementedError; end
-      def service;          raise NotImplementedError; end
-      
+       
     end
   end
 end
