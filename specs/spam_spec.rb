@@ -1,155 +1,36 @@
 require 'rack'
-require 'rack/lint'
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/spam.rb')
 require File.expand_path(File.dirname(__FILE__) + '/../lib/filter.rb')
+require File.expand_path(File.dirname(__FILE__) + '/../lib/filter/akismet.rb')
 
-# rack.input's StringIO is replaced with a plain string in env.yaml. 
-# To maintain compatibility, String needs to respond to #read.
-
-class String
-  @flag
-
-  def read
-    return "" if @flag
-    @flag = 1
-    self 
-  end
-end
+include Rack
 
 describe Rack::Spam do
 
+  # Set up configuration variables
+
   before :all do
-    config = YAML::load_file('config.yaml')
-    @domain = config[:domain]
-    @post_url = config[:post_url]
-    @akismet_key, @defensio_key, @mollom_key = [:akismet, :defensio, :mollom].map {|s| config[s]}
+    @service = :akismet
+    @domain = 'http://copypastel.com'
+    @key = 'e56eb5d6b47c'
+    @post_url = '/comments'
+    @env = Rack::MockRequest.env_for('/comments', {:input => "username=ecin&email=ecin@copypastel.com&comment=This is awesome!"})
   end
 
-  describe Rack::Spam::Filter do
+  it 'should raise an error when checking for spam if no filters have been added' do
+    Spam.filters.should be_empty
+    lambda { Spam.spam? @env }.should raise_error
+  end
 
-    describe "#new" do
-
-      it "should check that :akismet is a valid :service" do
-        Rack::Spam::Filter.new(:akismet, @domain, @akismet_key, @post_url).class.should be(Rack::Spam::Filter)    
-      end
-
-      it "should check that :defensio is a valid :service" do
-        Rack::Spam::Filter.new(:defensio, @domain, @defensio_key, @post_url).class.should be(Rack::Spam::Filter)    
-      end
-
-      it "should check that :mollom is a valid :service" do
-        Rack::Spam::Filter.new(:mollom, @domain, @mollom_key, @post_url).class.should be(Rack::Spam::Filter)
-      end
-
-      it "should check that :service is one of the valid services" do
-        lambda{ Rack::Spam::Filter.new(:tweetspam, @domain, '12345', @post_url) }.should raise_error
-      end
-
-    end
-
-    describe "#comment?" do
-
-      before :all do
-        @filter = Rack::Spam::Filter.new(:akismet, @domain, @akismet_key, @post_url)
-      end
-
-      before :each do
-        @env = YAML::load_file('env.yaml')
-      end
-
-      it "should accept @env as a valid comment" do
-        @filter.comment?(@env).should be(true)
-      end
-
-      it "should check that the request is a POST" do
-        @env['REQUEST_METHOD'] = 'GET'
-        @filter.comment?(@env).should be(false)
-      end
-
-      it "should check against the comments POST URL" do
-        @env['PATH_INFO'] = ''
-        @filter.comment?(@env).should be(false)
-      end
-
-      it "should check for :username value in the input stream" do
-        @env['rack.input'].gsub! 'username', 'user'
-        @filter.comment?(@env).should be(false)
-      end
-
-      it "should check for :email value in the input stream" do
-        @env['rack.input'].gsub! 'email', 'mail'
-        @filter.comment?(@env).should be(false)
-      end
-
-      it "should check for :comment value in the input stream" do
-        @env['rack.input'].gsub! 'comment', 'thoughts'
-        @filter.comment?(@env).should be(false)
-      end
-
-    end
-
-    describe 'when using Akismet' do
-
-      before :all do
-        @filter = Rack::Spam::Filter.new(:akismet, @domain, @akismet_key, @post_url)
-        @spam = YAML::load_file('spam.yaml')
-      end
-
-      describe "#verify?" do
-
-        it "should validate the API key and domain" do
-          @filter.verify?.should be(true)
-          @filter = Rack::Spam::Filter.new(:akismet, @domain, '12345', @post_url)
-          lambda { @filter.verify? }.should raise_error
-        end
-
-      end
-
-      describe '#spam?' do
-
-        it "should flag a comment as spam" do
-          @filter.spam?(@spam).should be(true)
-        end
-
-      end
-
-    end
-
-    describe 'when using Defensio' do
-
-      before :all do
-        @filter = Rack::Spam::Filter.new(:defensio, @domain, @defensio_key, @post_url)
-        @spam = YAML::load_file('spam.yaml')
-      end
-
-      describe '#spam?' do
-
-        it "should flag a comment as spam" do
-          @filter.spam?(@spam).should be(true)
-        end
-
-      end
-
-    end
-
-    describe 'when using Mollom' do
-
-      before :all do
-        @filter = Rack::Spam::Filter.new(:mollom, @domain, @mollom_key, @post_url)
-        @spam = YAML::load_file('spam.yaml')
-      end
-
-      describe '#spam?' do
-
-        it "should flag a comment as spam" do
-          @filter.spam?(@spam).should be(true)
-        end
-
-      end
-
-    end
-
+  it 'should be capable of adding filters' do
+    Spam.add_filter(@service, @domain, @key, @post_url)
+    Spam.filters.size.should == 1
+  end
+  
+  it 'should check against all filters when checking for spam' do
+    Spam.filters.each {|f| f.should_receive :spam?}
+    Spam.spam? @env
   end
 
 end
