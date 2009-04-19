@@ -1,16 +1,18 @@
-require File.expand_path(File.dirname(__FILE__) + '/../gem/rdefensio/lib/rdefensio')
-require File.expand_path(File.dirname(__FILE__) + '/../gem/ruby-mollom/lib/mollom')
+require File.expand_path(File.dirname(__FILE__) + '/../lib/spam')
 
-module Rack
-  module Spam
-    module Filter
-      
-      attr_reader :domain, :key, :post_url
-      
-      def self.build(service, domain, key, post_url)
-        self.const_get(service.to_s.capitalize).new(domain, key, post_url)
-      end
-       
+class Rack::Spam
+  module Filter
+
+    def self.build(service, domain, key, post_url)
+      self.const_get(service.to_s.capitalize).new(domain, key, post_url)
     end
+    
+    def comment?( env )
+      return false unless env['REQUEST_METHOD'] == 'POST' and 
+                          env['PATH_INFO'] =~ /#{@post_url}/
+      request = Request.new env
+      [ :username=, :email, :comment ].all? { |key| not request[key].nil?  }
+    end
+
   end
 end
