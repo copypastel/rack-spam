@@ -8,7 +8,7 @@ module Rack::Spam::Filter
   end 
 end
 
-include Rack::Spam
+include Rack
 
 describe Rack::Spam::Filter do
 
@@ -22,12 +22,12 @@ describe Rack::Spam::Filter do
     end
     
     it 'should instantiate a Filter class depending on :service' do
-      klass = Filter.const_get(@service.to_s.capitalize)
-      Filter.build(@service, @domain, @key, @post_url).class.should be(klass)
+      klass = Spam::Filter.const_get(@service.to_s.capitalize)
+      Spam::Filter.build(@service, @domain, @key, @post_url).class.should be(klass)
     end
     
     it 'should raise an error on trying to instantiate a Filter class that doesn\'t exist' do
-      lambda { Filter.build(:tweetspam, @domain, @key, @post_url) }.should raise_error
+      lambda { Spam::Filter.build(:tweetspam, @domain, @key, @post_url) }.should raise_error
     end
   end
 
