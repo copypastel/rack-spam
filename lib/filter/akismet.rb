@@ -7,18 +7,11 @@ require File.expand_path(File.dirname(__FILE__) + '/../../gem/akismet/lib/akisme
 module Rack::Spam::Filter
   class Akismet < ::Akismet
 
+    include Rack::Spam::Filter
+
     def initialize(domain, key, post_url)
       @post_url = post_url
       super(key, domain)
-    end
-
-    def comment?( env )
-      return false unless env['REQUEST_METHOD'] == 'POST' and 
-                          env['PATH_INFO'] =~ Regexp.new('.*' + @post_url)
-      input = env['rack.input'].read
-      [ /&?username=/, 
-        /&?email=/, 
-        /&?comment=/ ].all? { |attribute| input =~ attribute }
     end
 
     def verify?
