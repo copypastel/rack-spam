@@ -2,6 +2,8 @@ module Rack::Spam::Filter
 
   class YourFilter
 
+    include Rack::Spam::Filter
+
     def initialize( domain, key, post_url)
       raise NotImplementedError
     end
