@@ -1,3 +1,13 @@
+class StringIO
+  def append( string )
+    current = self.pos
+    self.pos = self.length
+    self << string
+    self.pos = current
+    self
+  end
+end
+
 module Rack
   class Spam
     
@@ -10,15 +20,26 @@ module Rack
     def initialize( app, opts = {} )
       @app = app
       @filters = []
+      @mode = opts[:mode]
+      domain = opts[:domain]
+      post_url = opts[:post_url]
+      if services = opts[:services]
+        services.each_pair {|serv, key| add_filter(serv, domain, key, post_url)} 
+      end
     end
     
     def call( env )
       request = Request.new env
       if spam? env
-        # what to do here?
-      else
-        return @app.call(env)
+        if @mode == :block
+          names = filters.map {|f| f.service}
+          body = "Sorry, your comment was considered spam by <b>#{names.join(' ')}</b>. Try again with something less spammy!"
+          return [200, {}, "<center><b>#{body}</b></center>"]
+        else
+          env['rack.input'].append '&spam=1'
+        end
       end
+      @app.call(env)
     end
     
     def add_filter(service, domain, key, post_url)
@@ -33,10 +54,6 @@ module Rack
       @filters.each {|filter| result &&= filter.spam?(env) }
       return result
     end
-    
-    def self.filters
-      @@filters
-    end
-    
+
   end
 end

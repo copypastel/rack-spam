@@ -19,19 +19,27 @@ describe Rack::Spam do
     @app = lambda { |env| [200, {}, "Lambda, lambda, lambda app, hoooo!"] }
   end
 
-  before :each do
-    @middleware = Spam.new @app
-  end
-
   it 'should accept an :app and an :opts hash at instantiation' do
     lambda { Spam.new(@app, {}) }.should_not raise_error
+  end
+  
+  it 'should set filters given their parameters in the :opts hash' do
+    middleware = Spam.new(@app, :domain => 'http://copypastel.com', 
+                                :post_url => '/comments', 
+                                :services => {:akismet => '12345'})
+    middleware.filters.size.should == 1
+  end
+  
+  before :each do
+    @middleware = Spam.new @app
   end
   
   it 'should return an array with status, headers, and body when sent :call' do
     @middleware.add_filter(@service, @domain, @key, @post_url)
     response = @middleware.call(@env)
-    response.class.should be(Array)
+    response.class.should be(Array) 
     response.size.should == 3
+    response[2] == "Lambda, lambda, lambda app, hoooo!"
   end
 
   it 'should raise an error when checking for spam if no filters have been added' do
