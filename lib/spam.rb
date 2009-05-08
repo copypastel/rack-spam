@@ -29,6 +29,7 @@ module Rack
     end
     
     def call( env )
+      @app.call(env) unless comment?(env)
       request = Request.new env
       if spam? env
         if @mode == :block
@@ -54,6 +55,17 @@ module Rack
       @filters.each {|filter| result &&= filter.spam?(env) }
       return result
     end
-
+    
+    private
+    
+    # Checks if a request is a comment. Necessary before the request is checked for spam.
+    
+    def comment?( env )
+      return false unless env['REQUEST_METHOD'] == 'POST' and 
+                          env['PATH_INFO'] =~ /#{@post_url}/
+      request = Request.new env
+      [ :username, :email, :comment ].all? { |key| not request[key].nil?  }
+    end
+    
   end
 end
