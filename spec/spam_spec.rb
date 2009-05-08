@@ -58,11 +58,18 @@ describe Rack::Spam do
     @middleware.filters.size.should == 1
   end
   
-  # Each request is wrung through all the filters
-  it 'should check against all filters when checking for spam' do
+  # First step is to check if the incoming request is a comment and should be checked for spam
+  it 'should check that the request is a comment when called' do
+    @middleware.add_filter(@service, @domain, @key, @post_url)
+    @middleware.should_receive :comment?
+    @middleware.call @env
+  end
+  
+  # Each request (assuming it's a comment) is wrung through all the filters
+  it 'should check against all filters when called' do
     @middleware.add_filter(@service, @domain, @key, @post_url)
     @middleware.filters.each {|f| f.should_receive :spam?}
-    @middleware.spam? @env
+    @middleware.call @env
   end
 
 end
