@@ -5,6 +5,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../../lib/filter')
 require File.expand_path(File.dirname(__FILE__) + '/../../gem/akismet/lib/akismet')
 
 module Rack::Spam::Filter
+  # Inherits from the Akismet gem's class
   class Akismet < ::Akismet
 
     include Rack::Spam::Filter
