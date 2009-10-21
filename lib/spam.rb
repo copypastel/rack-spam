@@ -20,7 +20,7 @@ module Rack
     def initialize( app, opts = {} )
       @app = app
       @filters = []
-      @mode = opts[:mode]
+      @block = opts[:block]
       domain = opts[:domain]
       post_url = opts[:post_url]
       if services = opts[:services]
@@ -32,7 +32,7 @@ module Rack
       @app.call(env) unless comment?(env)
       request = Request.new env
       if spam? env
-        if @mode == :block
+        if block_msgs?
           names = filters.map {|f| f.service}
           body = "Sorry, your comment was considered spam by <b>#{names.join(' ')}</b>. Try again with something less spammy!"
           return [200, {}, "<center><b>#{body}</b></center>"]
@@ -67,5 +67,8 @@ module Rack
       [ :username, :email, :comment ].all? { |key| not request[key].nil?  }
     end
     
+    def block_msgs?
+      @block
+    end
   end
 end

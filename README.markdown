@@ -20,9 +20,9 @@ Three configuration arguments are needed, with a fourth optional one:
 * *:domain* : The domain for your site. This usually equates to the username used when querying a spam service like Akismet.
 * *:post_url* : Rack::Spam assumes that you have a single URL for POSTing comments. Only incoming requests that have said URL as their destination are checked for spam.
 * *:services* : The services argument is a hash with the services' name as keys, and their API key as values. If a request is tagged as spam by single service, it's considered spam by Rack::Spam. At the moment, only :akismet is a valid service key. 
-* *:mode* : (optional) If set to :block, requests that are deemed spam by Rack::Spam are not forwarded to the web application.
+* *:block* : (optional) If set to true, requests that are deemed spam by Rack::Spam are not forwarded to the web application.
 
-Unless :mode is set to :block, a request that's deemed spam will have '&spam=1' added to its input string. Check Rack::Spam#call for details.
+Unless :block is set to true, a request that's deemed spam will have '&spam=1' added to its input string. Check Rack::Spam#call for details.
 
 In your rackup file, you'll end up with something similar:
 
