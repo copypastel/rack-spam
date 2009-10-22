@@ -1,0 +1,15 @@
+<html>
+<head>
+  <title>Rack::Spam Dashboard</title>
+  <style>
+  
+  </style>
+</head>
+<body>
+  <% for spam_msg in @spam_msgs %>
+    <span class='username'><%= spam_msg.username %></span>
+    <span class='email'><%= spam_msg.email %></span>
+    <span class='comment'><%= spam_msg.comment %></span>
+  <% end %>
+</body>
+</html>
