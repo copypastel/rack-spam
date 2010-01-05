@@ -15,7 +15,7 @@ describe Rack::Spam do
     @domain = 'http://copypastel.com'
     @key = 'e56eb5d6b47c'
     @post_url = '/comments'
-    @env = Rack::MockRequest.env_for('/comments', {:input => "username=ecin&email=ecin@copypastel.com&comment=This is awesome!"})
+    @env = Rack::MockRequest.env_for '/comments', YAML.load_file('env.yaml')
     # The Lambdacat App
     @app = lambda { |env| [200, {}, "Lambda, lambda, lambda app, hoooo!"] }
   end
