@@ -1,6 +1,6 @@
-require File.expand_path(File.dirname(__FILE__) + '/../lib/spam.rb')
-require File.expand_path(File.dirname(__FILE__) + '/../lib/filter.rb')
-require File.expand_path(File.dirname(__FILE__) + '/../lib/filter/akismet.rb')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/spam.rb')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/filter.rb')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/filter/akismet.rb')
 
 include Rack
 
@@ -10,10 +10,13 @@ describe Rack::Spam::Filter::Akismet do
   Akismet = Rack::Spam::Filter::Akismet
 
   before :all do
-    @env = Rack::MockRequest.env_for '/comments', YAML.load_file('env.yaml')
-    @spam = Rack::MockRequest.env_for '/comments', YAML.load_file('spam.yaml')
+    env_yaml = File.expand_path(File.dirname(__FILE__) + '/../env.yaml')
+    spam_yaml = File.expand_path(File.dirname(__FILE__) + '/../spam.yaml')
+    config_yaml = File.expand_path(File.dirname(__FILE__) + '/../config.yaml')
+    @env = Rack::MockRequest.env_for '/comments', YAML.load_file(env_yaml)
+    @spam = Rack::MockRequest.env_for '/comments', YAML.load_file(spam_yaml)
     @domain = 'http://copypastel.com'
-    @key = YAML.load_file('config.yaml')[:akismet]
+    @key = YAML.load_file(config_yaml)[:akismet]
     @post_url = '/comments'
   end
 
